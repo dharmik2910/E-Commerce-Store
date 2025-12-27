@@ -1,6 +1,7 @@
 # E-Commerce Application
 
 A modern, full-featured e-commerce application built with React, Redux Toolkit, and Material-UI.
+Live: https://e-commerce-store-vite.vercel.app
 
 ## Features
 
