@@ -17,13 +17,11 @@ A modern, full-featured e-commerce application built with React, Redux Toolkit, 
 - **Product Sorting**: Sort products by price (low to high, high to low) and name (A-Z, Z-A)
 - **Pagination**: Navigate through products with pagination controls
 - **Product Detail Page**: Detailed product view with:
-  - High-quality product images
   - Product description and specifications
   - Price and rating display
   - Product reviews and ratings
   - Add product reviews functionality
   - Similar product recommendations
-  - Recently viewed products tracking
 
 ### Shopping Cart
 - **Add to Cart**: Add products to cart from product listing or detail page
@@ -184,7 +182,6 @@ src/
 - **Wishlist**: Wishlist items saved in localStorage
 - **Orders**: Order history stored in localStorage
 - **State Restoration**: All state automatically restored on page reload
-- **Recently Viewed**: Product viewing history tracked in localStorage
 
 
 ### Important Notes
