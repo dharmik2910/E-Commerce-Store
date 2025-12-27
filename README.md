@@ -195,6 +195,4 @@ src/
 - ✅ Fully responsive design for all screen sizes
 
 
-## License
 
-This project is created for assessment purposes.
