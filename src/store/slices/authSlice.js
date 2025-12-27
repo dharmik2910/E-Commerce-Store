@@ -19,15 +19,29 @@ export const loginUser = createAsyncThunk(
       
       return response.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Login failed. Please check your credentials.'
-      );
+      const errorMessage = error.response?.data?.message || 
+                          error.response?.data?.error ||
+                          error.message ||
+                          'Login failed. Please check your credentials.';
+      return rejectWithValue(errorMessage);
     }
   }
 );
 
+// Safely parse localStorage data
+const getStoredUser = () => {
+  try {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  } catch (error) {
+    console.error('Error parsing stored user:', error);
+    localStorage.removeItem('user');
+    return null;
+  }
+};
+
 const initialState = {
-  user: JSON.parse(localStorage.getItem('user')) || null,
+  user: getStoredUser(),
   token: localStorage.getItem('token') || null,
   isAuthenticated: !!localStorage.getItem('token'),
   loading: false,
