@@ -160,17 +160,19 @@ src/
 ## 🚀 Usage
 
 ### 🔐 Authentication
-- Use any valid credentials from the **DummyJSON API**
-- JWT token is stored in `localStorage` after successful login
-- Protected routes require authentication
+- Use any valid credentials from the DummyJSON API  
+- JWT token is stored in `localStorage` after successful login  
+- Protected routes require authentication  
+
+---
 
 ### 🛍️ Shopping Flow
 
 #### Login
 - Login using DummyJSON credentials  
-  - Example:  
-    - **Username:** emilys  
-    - **Password:** emilyspass  
+- Example:  
+  - **Username:** emilys  
+  - **Password:** emilyspass  
 
 #### Browse Products
 - View all products on the home page  
@@ -224,7 +226,4 @@ src/
 - ✅ SPA routing configuration  
 - ✅ State persistence via `localStorage`  
 - ✅ Fully responsive across all devices  
-
-
-
 
