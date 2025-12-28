@@ -1,92 +1,112 @@
-# E-Commerce Application
+# 🛒 E-Commerce Application
 
-A modern, full-featured e-commerce application built with React, Redux Toolkit, and Material-UI.
-Live: https://e-commerce-store-vite.vercel.app
+A modern, full-featured **E-Commerce Web Application** built using **React, Redux Toolkit, and Material-UI** with a clean UI, smooth user experience, and complete shopping flow.
 
-## Features
+🌐 **Live Demo:** https://e-commerce-store-vite.vercel.app
 
-### Authentication & Security
-- **User Authentication**: Secure login system with JWT token storage using DummyJSON API
-- **Protected Routes**: Route protection ensures only authenticated users can access the application
-- **Session Persistence**: JWT tokens and user data stored in localStorage for persistent sessions
-- **Auto-redirect**: Automatic redirect to login page for unauthenticated users
+---
 
-### Product Browsing
-- **Product Catalog**: Browse all available products with beautiful card-based layout
-- **Product Search**: Real-time product search functionality
-- **Category Filtering**: Filter products by category with dynamic category loading
-- **Product Sorting**: Sort products by price (low to high, high to low) and name (A-Z, Z-A)
-- **Pagination**: Navigate through products with pagination controls
-- **Product Detail Page**: Detailed product view with:
-  - Product description and specifications
-  - Price and rating display
-  - Product reviews and ratings
-  - Add product reviews functionality
+## ✨ Features
+
+### 🔐 Authentication & Security
+- Secure user authentication using **DummyJSON API**
+- JWT token-based login
+- Protected routes for authenticated users only
+- Session persistence using `localStorage`
+- Auto-redirect to login for unauthenticated access
+
+---
+
+### 🛍️ Product Browsing
+- Product catalog with modern card-based UI
+- Real-time product search
+- Category-based filtering (dynamic categories)
+- Sorting by:
+  - Price (Low → High, High → Low)
+  - Name (A → Z, Z → A)
+- Pagination for easy navigation
+- **Product Detail Page** includes:
+  - Detailed product description & specifications
+  - Price and rating
+  - Product reviews & ratings
+  - Add product reviews
   - Similar product recommendations
 
-### Shopping Cart
-- **Add to Cart**: Add products to cart from product listing or detail page
-- **Cart Management**: 
-  - Update product quantities
-  - Remove items from cart
-  - Save items for later
-  - Move saved items back to cart
-- **Real-time Cart Count**: Cart item count displayed in navigation bar badge
-- **Cart Persistence**: Cart items saved in localStorage and restored on page reload
-- **Cart Total Calculation**: Automatic calculation of subtotal and total price
+---
 
-### Checkout & Orders
-- **Checkout Page**: Complete checkout process with:
-  - Cart items display with images and details
-  - Quantity adjustment and item removal
+### 🛒 Shopping Cart
+- Add products from listing or detail page
+- Update quantities and remove items
+- Save items for later
+- Move saved items back to cart
+- Real-time cart count in navigation bar
+- Cart persistence using `localStorage`
+- Automatic subtotal and total price calculation
+
+---
+
+### 🚚 Checkout & Orders
+- Checkout page with:
+  - Cart items with images & details
+  - Quantity update and item removal
   - Shipping address form with validation
   - Order summary with total price
-  - Save for later functionality
-- **Order Placement**: Create and save orders with order details
-- **Order History**: View all past orders with:
+- Place and save orders
+- Order history with:
   - Order status (pending, completed, shipped, cancelled)
-  - Order date and time
+  - Order date & time
   - Total amount
-  - Order status indicators with color coding
-- **Order Details**: Detailed view of individual orders with:
-  - Complete order information
-  - All ordered items
+- Detailed order view with:
+  - Ordered items
   - Shipping address
-  - Order status and tracking
+  - Order status & tracking
 
-### Wishlist
-- **Add to Wishlist**: Save favorite products to wishlist
-- **Wishlist Management**: 
-  - View all wishlist items
-  - Remove items from wishlist
-  - Add wishlist items directly to cart
-  - Sort wishlist items
-- **Wishlist Count**: Wishlist item count displayed in navigation bar
-- **Wishlist Persistence**: Wishlist items saved in localStorage
+---
 
-### User Experience
-- **Responsive Design**: Fully responsive design that works on desktop, tablet, and mobile devices
-- **Modern UI**: Beautiful, modern interface built with Material-UI components
-- **Loading States**: Loading indicators for better user feedback
-- **Error Handling**: Comprehensive error handling with user-friendly error messages
-- **Smooth Navigation**: Smooth page transitions and route navigation
-- **Search & Filter Chips**: Visual indicators for active search queries and category filters
+### ❤️ Wishlist
+- Add and remove wishlist items
+- Move wishlist items directly to cart
+- Sort wishlist items
+- Wishlist count in navigation bar
+- Wishlist persistence using `localStorage`
 
-## Tech Stack
+---
 
-- **React 19** - UI library
-- **Vite** - Build tool and dev server
-- **Redux Toolkit** - State management
-- **React Router** - Navigation and routing
-- **Material-UI (MUI)** - Component library
-- **Axios** - HTTP client for API calls
+### 🎨 User Experience
+- Fully responsive design (desktop, tablet, mobile)
+- Modern UI built with **Material-UI**
+- Loading indicators for better feedback
+- User-friendly error handling
+- Smooth navigation and routing
+- Visual chips for active search & filters
 
-## API Integration
+---
 
-This application uses the [DummyJSON API](https://dummyjson.com/):
-- Authentication: `https://dummyjson.com/auth/login`
-- Products: `https://dummyjson.com/products`
-- Categories: `https://dummyjson.com/products/categories`
+## 🧰 Tech Stack
+- **React 19** – UI library
+- **Vite** – Build tool & dev server
+- **Redux Toolkit** – State management
+- **React Router** – Routing & navigation
+- **Material-UI (MUI)** – UI components
+- **Axios** – API communication
+
+---
+
+## 🌐 API Integration
+This project uses the **DummyJSON API**:
+
+- Authentication: https://dummyjson.com/auth/login  
+- Products: https://dummyjson.com/products  
+- Categories: https://dummyjson.com/products/categories  
+
+---
+
+## ⚙️ Installation & Setup
+
+### Clone the repository
+```bash
+git clone <repository-url>
+cd ecommerce
 
 ## Installation
 
@@ -137,60 +157,74 @@ src/
 └── main.jsx                # Application entry point
 ```
 
-## Usage
+## 🚀 Usage
 
-### Authentication
-- Use any valid credentials from the DummyJSON API
-- JWT token is stored in localStorage upon successful login
+### 🔐 Authentication
+- Use any valid credentials from the **DummyJSON API**
+- JWT token is stored in `localStorage` after successful login
 - Protected routes require authentication
 
-### Shopping Flow
-1. **Login**: Use DummyJSON credentials to login (e.g., username: `emilys`, password: `emilyspass`)
-2. **Browse Products**: 
-   - View all products on the home page
-   - Use search bar to find specific products
-   - Filter by category using the dropdown
-   - Sort products by price or name
-   - Navigate through pages using pagination
-3. **Product Details**: Click on any product to view:
-   - Full product information
-   - Product reviews and ratings
-   - Similar product recommendations
-   - Add to cart or wishlist
-4. **Add to Cart**: 
-   - Click "Add to Cart" button on any product
-   - View cart count in the navigation bar badge
-5. **Wishlist**: 
-   - Click heart icon to add products to wishlist
-   - View wishlist from navigation bar
-   - Add wishlist items to cart
-6. **Checkout**: 
-   - Click cart icon in navigation to go to checkout
-   - Review cart items
-   - Adjust quantities or remove items
-   - Save items for later if needed
-   - Fill shipping address form
-   - Place order to complete purchase
-7. **Order Management**:
-   - View order history from navigation
-   - Click on any order to view details
-   - Track order status
+### 🛍️ Shopping Flow
 
+#### Login
+- Login using DummyJSON credentials  
+  - Example:  
+    - **Username:** emilys  
+    - **Password:** emilyspass  
 
-### Data Persistence
-- **Authentication**: JWT tokens and user data stored in localStorage
-- **Cart**: Cart items and saved-for-later items persisted in localStorage
-- **Wishlist**: Wishlist items saved in localStorage
-- **Orders**: Order history stored in localStorage
-- **State Restoration**: All state automatically restored on page reload
+#### Browse Products
+- View all products on the home page  
+- Search products using the search bar  
+- Filter products by category using dropdown  
+- Sort products by price or name  
+- Navigate using pagination  
 
+#### Product Details
+- Click on a product to view:
+  - Full product information  
+  - Reviews and ratings  
+  - Similar product recommendations  
+- Add product to cart or wishlist  
 
-### Important Notes
+#### Add to Cart
+- Click **Add to Cart** on any product  
+- View updated cart count in navbar badge  
 
-- ✅ This app uses external API (DummyJSON), so no backend needed
-- ✅ All routing is configured for SPA (Single Page Application)
-- ✅ State persistence via localStorage (cart, wishlist, orders, auth)
-- ✅ Fully responsive design for all screen sizes
+#### Wishlist
+- Click heart icon to add products to wishlist  
+- View wishlist from navigation bar  
+- Add wishlist items directly to cart  
+
+#### Checkout
+- Click cart icon to open checkout page  
+- Review cart items  
+- Update quantities or remove items  
+- Save items for later  
+- Fill shipping address form  
+- Place order to complete purchase  
+
+#### Order Management
+- View order history from navigation  
+- Click an order to view full details  
+- Track order status  
+
+---
+
+## 💾 Data Persistence
+- **Authentication:** JWT token & user data stored in `localStorage`  
+- **Cart:** Cart and saved-for-later items persisted  
+- **Wishlist:** Wishlist items saved  
+- **Orders:** Order history stored  
+- **State Restoration:** All data restored on page reload  
+
+---
+
+## ℹ️ Important Notes
+- ✅ Uses external API (**DummyJSON**) — no backend required  
+- ✅ SPA routing configuration  
+- ✅ State persistence via `localStorage`  
+- ✅ Fully responsive across all devices  
+
 
 
 
