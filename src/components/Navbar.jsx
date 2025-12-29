@@ -49,12 +49,11 @@ const Navbar = () => {
         borderRadius: 0,
       }}
     >
-      <Toolbar sx={{ py: { xs: 1, sm: 1.5 }, px: { xs: 1, sm: 3 }, minHeight: { xs: 48, sm: 64 } }}>
+      <Toolbar sx={{ py: { xs: 1, sm: 1.5 }, px: { xs: 1, sm: 3 }, minHeight: { xs: 48, sm: 64 }, display: 'flex', justifyContent: 'space-between' }}>
         <Typography
           variant="h5"
           component="div"
           sx={{ 
-            flexGrow: 1, 
             cursor: 'pointer',
             fontWeight: 800,
             letterSpacing: '-0.5px',
@@ -71,7 +70,7 @@ const Navbar = () => {
         </Typography>
         
         {isAuthenticated && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, ml: 'auto' }}>
             <IconButton
               color="inherit"
               onClick={() => navigate('/orders')}

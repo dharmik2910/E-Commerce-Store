@@ -426,7 +426,7 @@ const Home = () => {
                     display: '-webkit-box',
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical',
-                    fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' },
+                    fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
                   }}
                 >
                   {product.title}
@@ -438,7 +438,7 @@ const Home = () => {
                     readOnly 
                     size="small"
                     sx={{
-                      fontSize: { xs: '1rem', sm: '1.25rem' },
+                      fontSize: { xs: '0.875rem', sm: '1rem' },
                       '& .MuiRating-iconFilled': {
                         color: '#fbbf24',
                       },
@@ -447,7 +447,7 @@ const Home = () => {
                   <Typography 
                     variant="body2" 
                     color="text.secondary"
-                    sx={{ fontWeight: 500, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                    sx={{ fontWeight: 500, fontSize: { xs: '0.65rem', sm: '0.75rem' } }}
                   >
                     {product.rating ? product.rating.toFixed(1) : '0.0'}
                   </Typography>
@@ -455,7 +455,7 @@ const Home = () => {
                     <Typography 
                       variant="body2" 
                       color="text.secondary"
-                      sx={{ ml: 0.5, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                      sx={{ ml: 0.5, fontSize: { xs: '0.65rem', sm: '0.75rem' } }}
                     >
                       ({product.reviews.length})
                     </Typography>
@@ -468,7 +468,7 @@ const Home = () => {
                       sx={{
                         fontWeight: 700,
                         color: '#667EEA',
-                        fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' },
+                        fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
                       }}
                     >
                       {formatPrice(product.price)}
@@ -482,7 +482,7 @@ const Home = () => {
                           sx={{ 
                             textDecoration: 'line-through',
                             fontWeight: 500,
-                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
                           }}
                         >
                           {formatPrice(originalPrice)}
@@ -504,7 +504,7 @@ const Home = () => {
                       fontWeight: 600,
                       backgroundColor: 'rgb(65, 131, 245)',
                       boxShadow: '0 2px 8px rgba(65, 131, 245, 0.3)',
-                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                      fontSize: { xs: '0.7rem', sm: '0.8rem' },
                       px: { xs: 1, sm: 2 },
                       py: { xs: 0.5, sm: 0.75 },
                       width: { xs: '100%', sm: 'auto' },
