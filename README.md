@@ -61,6 +61,6 @@ A modern, full-featured **E-Commerce Web Application** built using **React, Redu
 
 ```bash
 git clone <repository-url>
-cd ecommerce
+cd e-commerce-store
 npm install
 npm run dev
