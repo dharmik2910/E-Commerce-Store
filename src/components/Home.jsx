@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Container,
-  Grid,
   Card,
   CardContent,
   CardMedia,
@@ -18,174 +17,135 @@ import {
   Chip,
   TextField,
   InputAdornment,
+  IconButton,
+  Rating,
 } from '@mui/material';
 import { Search, Clear } from '@mui/icons-material';
-import { AddShoppingCart } from '@mui/icons-material';
+import { AddShoppingCart, Favorite, FavoriteBorder } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../store/slices/cartSlice';
-import { getProducts, getCategories } from '../services/api';
+import { addToWishlist, removeFromWishlist, selectWishlistItems } from '../store/slices/wishlistSlice';
+import {
+  fetchProducts,
+  fetchCategories,
+  setSearchQuery,
+  setSelectedCategory,
+  setSortOption,
+  setCurrentPage,
+} from '../store/slices/productSlice';
+import {
+  selectSortedProducts,
+  selectProductsLoading,
+  selectProductsError,
+  selectTotalPages,
+  selectCurrentPage,
+  selectCategories,
+  selectSelectedCategory,
+  selectSearchQuery,
+  selectSortOption,
+} from '../store/slices/productSelectors';
+import { formatCategoryName, SORT_OPTIONS, SORT_OPTION_LABELS, calculateOriginalPrice } from '../utils/productConstants';
 import { formatPrice } from '../utils/currency';
 
 const Home = () => {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortOption, setSortOption] = useState('default');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [totalPages, setTotalPages] = useState(1);
-  
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const itemsPerPage = 12;
+  const itemsPerPage = 15;
 
-  // Helper function to sort products
-  const sortProducts = (productsList) => {
-    if (sortOption === 'default' || !productsList || productsList.length === 0) {
-      return productsList;
-    }
+  // Redux state
+  const products = useSelector(selectSortedProducts);
+  const loading = useSelector(selectProductsLoading);
+  const error = useSelector(selectProductsError);
+  const totalPages = useSelector(selectTotalPages);
+  const currentPage = useSelector(selectCurrentPage);
+  const categories = useSelector(selectCategories);
+  const selectedCategory = useSelector(selectSelectedCategory);
+  const searchQuery = useSelector(selectSearchQuery);
+  const sortOption = useSelector(selectSortOption);
+  const wishlistItems = useSelector(selectWishlistItems);
 
-    return [...productsList].sort((a, b) => {
-      switch (sortOption) {
-        case 'price-low':
-          return a.price - b.price;
-        case 'price-high':
-          return b.price - a.price;
-        case 'name-asc':
-          return a.title.localeCompare(b.title);
-        case 'name-desc':
-          return b.title.localeCompare(a.title);
-        default:
-          return 0;
-      }
-    });
-  };
+  // Local state for search input (debounced)
+  const [searchInput, setSearchInput] = useState(searchQuery);
 
+  // Fetch categories on mount
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
+  // Fetch products when filters change
   useEffect(() => {
-    fetchProducts();
-  }, [selectedCategory, currentPage, searchQuery]);
+    const skip = (currentPage - 1) * itemsPerPage;
+    dispatch(fetchProducts({ skip, limit: itemsPerPage, category: selectedCategory, searchQuery }));
+  }, [dispatch, selectedCategory, currentPage, searchQuery, itemsPerPage]);
 
-  // Sort products whenever sort option changes
+  // Debounce search input
   useEffect(() => {
-    if (products.length > 0) {
-      const sortedProducts = sortProducts(products);
-      setProducts(sortedProducts);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortOption]);
+    const timer = setTimeout(() => {
+      if (searchInput !== searchQuery) {
+        dispatch(setSearchQuery(searchInput));
+      }
+    }, 500);
 
-  const fetchCategories = async () => {
-    try {
-      // First, try to get categories from the API
-      const data = await getCategories();
-      let categoryList = [];
-      
-      if (Array.isArray(data) && data.length > 0) {
-        categoryList = data.filter(cat => typeof cat === 'string' && cat.trim() !== '');
-      }
-      
-      // Also fetch products to verify which categories actually have products
-      // This ensures we only show categories that have products available
-      try {
-        const productsData = await getProducts(0, 100);
-        if (productsData.products && Array.isArray(productsData.products)) {
-          const categoriesFromProducts = [...new Set(
-            productsData.products
-              .map(p => p.category)
-              .filter(cat => cat && typeof cat === 'string')
-          )];
-          
-          // Merge API categories with categories from products
-          // This ensures we have all categories that actually have products
-          const allCategories = [...new Set([...categoryList, ...categoriesFromProducts])];
-          setCategories(allCategories.length > 0 ? allCategories : categoryList);
-        } else {
-          setCategories(categoryList);
-        }
-      } catch (productErr) {
-        // If fetching products fails, still use the categories from API
-        console.warn('Could not verify categories from products:', productErr);
-        setCategories(categoryList);
-      }
-    } catch (err) {
-      console.error('Error fetching categories:', err);
-      // Set empty array, but the API service should have provided fallback
-      setCategories([]);
-    }
-  };
-
-  const fetchProducts = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const skip = (currentPage - 1) * itemsPerPage;
-      const data = await getProducts(skip, itemsPerPage, selectedCategory, searchQuery);
-      let productsList = data.products || [];
-      
-      // Sort products after fetching
-      productsList = sortProducts(productsList);
-      setProducts(productsList);
-      setTotalPages(Math.ceil((data.total || 0) / itemsPerPage));
-      
-      // Show a message if no products found
-      if (searchQuery && productsList.length === 0) {
-        setError(`No products found for "${searchQuery}". Try a different search term.`);
-      } else if (selectedCategory && productsList.length === 0) {
-        setError(`No products available in the "${selectedCategory}" category. Try selecting a different category.`);
-      } else {
-        setError(null);
-      }
-    } catch (err) {
-      setError('Failed to fetch products. Please try again.');
-      console.error('Error fetching products:', err);
-      setProducts([]);
-      setTotalPages(1);
-    } finally {
-      setLoading(false);
-    }
-  };
+    return () => clearTimeout(timer);
+  }, [searchInput, searchQuery, dispatch]);
 
   const handleCategoryChange = (event) => {
-    setSelectedCategory(event.target.value);
-    setCurrentPage(1);
+    const newCategory = event.target.value;
+    dispatch(setSelectedCategory(newCategory));
+    dispatch(setCurrentPage(1));
     // Clear search when category changes
-    setSearchQuery('');
+    if (newCategory) {
+      dispatch(setSearchQuery(''));
+      setSearchInput('');
+    }
   };
 
   const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
-    setCurrentPage(1);
+    const value = event.target.value;
+    setSearchInput(value);
     // Clear category when searching
-    if (event.target.value.trim() !== '') {
-      setSelectedCategory('');
+    if (value.trim() !== '' && selectedCategory) {
+      dispatch(setSelectedCategory(''));
     }
   };
 
   const handleClearSearch = () => {
-    setSearchQuery('');
-    setCurrentPage(1);
+    setSearchInput('');
+    dispatch(setSearchQuery(''));
+    dispatch(setCurrentPage(1));
   };
 
   const handleSortChange = (event) => {
-    setSortOption(event.target.value);
-    setCurrentPage(1); // Reset to first page when sorting changes
+    dispatch(setSortOption(event.target.value));
+    dispatch(setCurrentPage(1));
   };
 
   const handlePageChange = (event, value) => {
-    setCurrentPage(value);
+    dispatch(setCurrentPage(value));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleAddToCart = (product) => {
     dispatch(addToCart(product));
   };
+
+  const handleWishlistToggle = (e, product) => {
+    e.stopPropagation();
+    const isInWishlist = wishlistItems.some((item) => item.id === product.id);
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(product.id));
+    } else {
+      dispatch(addToWishlist(product));
+    }
+  };
+
+  // Generate error message
+  const errorMessage = error || (products.length === 0 && !loading && searchQuery
+    ? `No products found for "${searchQuery}". Try a different search term.`
+    : products.length === 0 && !loading && selectedCategory
+    ? `No products available in the "${selectedCategory}" category. Try selecting a different category.`
+    : null);
 
   if (loading && products.length === 0) {
     return (
@@ -198,68 +158,127 @@ const Home = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Products
+        <Typography 
+          variant="h4" 
+          component="h1" 
+          gutterBottom
+          sx={{
+            fontWeight: 800,
+            background: 'linear-gradient(135deg, #667eea 0%,rgb(54, 82, 222) 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            mb: 3,
+          }}
+        >
+          Discover Products
         </Typography>
         
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 2, alignItems: 'center' }}>
+        <Box sx={{ 
+          display: 'flex', 
+          gap: { xs: 1, sm: 2 }, 
+          flexWrap: { xs: 'nowrap', sm: 'wrap' }, 
+          mt: 2, 
+          alignItems: 'center',
+          p: { xs: 1, sm: 2 },
+          borderRadius: 1,
+          bgcolor: 'background.paper',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+        }}>
           <TextField
             placeholder="Search products..."
-            value={searchQuery}
+            value={searchInput}
             onChange={handleSearchChange}
             variant="outlined"
-            sx={{ minWidth: 300, flexGrow: 1, maxWidth: 500 }}
+            size="small"
+            sx={{ 
+              minWidth: { xs: 120, sm: 300 }, 
+              flexGrow: 1, 
+              maxWidth: { xs: 'none', sm: 500 },
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                fontSize: { xs: '0.875rem', sm: '1rem' },
+                '&:hover fieldset': {
+                  borderColor: 'primary.main',
+                },
+              },
+            }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <Search />
+                  <Search color="primary" sx={{ fontSize: { xs: '1rem', sm: '1.5rem' } }} />
                 </InputAdornment>
               ),
-              endAdornment: searchQuery && (
+              endAdornment: searchInput && (
                 <InputAdornment position="end">
-                  <Button
+                  <IconButton
                     size="small"
                     onClick={handleClearSearch}
                     sx={{ minWidth: 'auto', p: 0.5 }}
                   >
                     <Clear fontSize="small" />
-                  </Button>
+                  </IconButton>
                 </InputAdornment>
               ),
             }}
           />
           
-          <FormControl sx={{ minWidth: 200 }}>
+          <FormControl 
+            size="small"
+            sx={{ 
+              minWidth: { xs: 100, sm: 200 },
+              '& .MuiInputLabel-root': {
+                fontSize: { xs: '0.875rem', sm: '1rem' },
+              },
+              '& .MuiSelect-select': {
+                fontSize: { xs: '0.875rem', sm: '1rem' },
+                py: { xs: 0.75, sm: 1 },
+              },
+            }}
+          >
             <InputLabel>Category</InputLabel>
             <Select
               value={selectedCategory}
               label="Category"
               onChange={handleCategoryChange}
+              sx={{ borderRadius: 2 }}
             >
-              <MenuItem value="">All Categories</MenuItem>
+              <MenuItem value="" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>All Categories</MenuItem>
               {categories.map((category) => {
                 const categoryStr = String(category);
                 return (
-                  <MenuItem key={categoryStr} value={categoryStr}>
-                    {categoryStr.charAt(0).toUpperCase() + categoryStr.slice(1)}
+                  <MenuItem key={categoryStr} value={categoryStr} sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
+                    {formatCategoryName(categoryStr)}
                   </MenuItem>
                 );
               })}
             </Select>
           </FormControl>
 
-          <FormControl sx={{ minWidth: 200 }}>
+          <FormControl 
+            size="small"
+            sx={{ 
+              minWidth: { xs: 100, sm: 200 },
+              '& .MuiInputLabel-root': {
+                fontSize: { xs: '0.875rem', sm: '1rem' },
+              },
+              '& .MuiSelect-select': {
+                fontSize: { xs: '0.875rem', sm: '1rem' },
+                py: { xs: 0.75, sm: 1 },
+              },
+            }}
+          >
             <InputLabel>Sort By</InputLabel>
             <Select
               value={sortOption}
               label="Sort By"
               onChange={handleSortChange}
+              sx={{ borderRadius: 2 }}
             >
-              <MenuItem value="default">Default</MenuItem>
-              <MenuItem value="price-low">Price: Low to High</MenuItem>
-              <MenuItem value="price-high">Price: High to Low</MenuItem>
-              <MenuItem value="name-asc">Name: A to Z</MenuItem>
-              <MenuItem value="name-desc">Name: Z to A</MenuItem>
+              {Object.values(SORT_OPTIONS).map((option) => (
+                <MenuItem key={option} value={option} sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
+                  {SORT_OPTION_LABELS[option]}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Box>
@@ -275,10 +294,10 @@ const Home = () => {
             )}
             {selectedCategory && (
               <Chip
-                label={`Category: ${selectedCategory}`}
+                label={`Category: ${formatCategoryName(selectedCategory)}`}
                 onDelete={() => {
-                  setSelectedCategory('');
-                  setCurrentPage(1);
+                  dispatch(setSelectedCategory(''));
+                  dispatch(setCurrentPage(1));
                 }}
               />
             )}
@@ -286,63 +305,178 @@ const Home = () => {
         )}
       </Box>
 
-      {error && (
+      {errorMessage && (
         <Alert severity={products.length === 0 && selectedCategory ? "info" : "error"} sx={{ mb: 2 }}>
-          {error}
+          {errorMessage}
         </Alert>
       )}
 
-      <Grid container spacing={3} justifyContent="center">
-        {products.length === 0 && !loading ? (
-          <Grid item xs={12}>
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <Typography variant="h6" color="text.secondary">
-                No products found
-              </Typography>
-            </Box>
-          </Grid>
-        ) : (
-          products.map((product) => (
-          <Grid item xs={10} sm={5} md={4} lg={3} key={product.id}>
+      {products.length === 0 && !loading ? (
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <Typography variant="h6" color="text.secondary">
+            No products found
+          </Typography>
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: 'repeat(2, 1fr)',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(5, 1fr)',
+              lg: 'repeat(5, 1fr)',
+            },
+            gap: 3,
+          }}
+        >
+          {products.map((product) => (
             <Card
+              key={product.id}
               sx={{
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                maxWidth: 280,
                 width: '100%',
-                margin: '0 auto',
-                transition: 'transform 0.2s',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 cursor: 'pointer',
+                borderRadius: 1,
+                overflow: 'hidden',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
                 '&:hover': {
-                  transform: 'scale(1.02)',
+                  transform: 'translateY(-8px)',
+                  boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15)',
+                  '& .product-image': {
+                    transform: 'scale(1.05)',
+                  },
                 },
               }}
               onClick={() => navigate(`/product/${product.id}`)}
             >
-              <CardMedia
-                component="img"
-                image={product.thumbnail}
-                alt={product.title}
-                sx={{
-                  width: '100%',
-                  height: 250,
-                  objectFit: 'contain',
-                  backgroundColor: '#f5f5f5',
-                  padding: 1,
-                }}
-              />
-              <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                <Typography gutterBottom variant="h6" component="h2" noWrap>
+              <Box sx={{ position: 'relative', overflow: 'hidden', bgcolor: '#f8fafc' }}>
+                <CardMedia
+                  component="img"
+                  image={product.thumbnail}
+                  alt={product.title}
+                  className="product-image"
+                  sx={{
+                    width: '100%',
+                    height: 180,
+                    objectFit: 'contain',
+                    padding: 2,
+                    transition: 'transform 0.5s ease',
+                  }}
+                />
+                <IconButton
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    left: 8,
+                    zIndex: 1,
+                    backgroundColor: 'transparent',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      backgroundColor: 'transparent',
+                      transform: 'scale(1.1)',
+                    },
+                  }}
+                  onClick={(e) => handleWishlistToggle(e, product)}
+                  color={wishlistItems.some((item) => item.id === product.id) ? 'error' : 'default'}
+                >
+                  {wishlistItems.some((item) => item.id === product.id) ? (
+                    <Favorite />
+                  ) : (
+                    <FavoriteBorder />
+                  )}
+                </IconButton>
+                {product.discountPercentage && (
+                  <Chip
+                    label={`${Math.round(product.discountPercentage)}% OFF`}
+                    color="error"
+                    size="small"
+                    sx={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      fontWeight: 700,
+                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+                    }}
+                  />
+                )}
+              </Box>
+              <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
+                <Typography 
+                  gutterBottom 
+                  variant="h6" 
+                  component="h2" 
+                  sx={{ 
+                    fontWeight: 600,
+                    mb: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                  }}
+                >
                   {product.title}
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1, flexGrow: 1 }}>
-                  {product.description?.substring(0, 100)}...
-                </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
-                  <Typography variant="h6" color="primary">
-                    {formatPrice(product.price)}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <Rating 
+                    value={product.rating || 0} 
+                    precision={0.1} 
+                    readOnly 
+                    size="small"
+                    sx={{
+                      '& .MuiRating-iconFilled': {
+                        color: '#fbbf24',
+                      },
+                    }}
+                  />
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary"
+                    sx={{ fontWeight: 500 }}
+                  >
+                    {product.rating ? product.rating.toFixed(1) : '0.0'}
                   </Typography>
+                  {product.reviews && Array.isArray(product.reviews) && product.reviews.length > 0 && (
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary"
+                      sx={{ ml: 0.5 }}
+                    >
+                      ({product.reviews.length})
+                    </Typography>
+                  )}
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto', gap: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                    <Typography 
+                      variant="h6" 
+                      sx={{
+                        fontWeight: 700,
+                        color: '#667EEA',
+                      }}
+                    >
+                      {formatPrice(product.price)}
+                    </Typography>
+                    {product.discountPercentage && (() => {
+                      const originalPrice = calculateOriginalPrice(product.price, product.discountPercentage);
+                      return originalPrice ? (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ 
+                            textDecoration: 'line-through',
+                            fontWeight: 500,
+                          }}
+                        >
+                          {formatPrice(originalPrice)}
+                        </Typography>
+                      ) : null;
+                    })()}
+                  </Box>
                   <Button
                     variant="contained"
                     size="small"
@@ -351,16 +485,27 @@ const Home = () => {
                       e.stopPropagation();
                       handleAddToCart(product);
                     }}
-                  >
-                    Add to Cart
+                    sx={{
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      backgroundColor: 'rgb(65, 131, 245)',
+                      boxShadow: '0 2px 8px rgba(65, 131, 245, 0.3)',
+                      '&:hover': {
+                        backgroundColor: 'rgb(45, 111, 225)',
+                        boxShadow: '0 4px 12px rgba(65, 131, 245, 0.4)',
+                        transform: 'translateY(-2px)',
+                      },
+                    }}
+                    >
+                    Add
                   </Button>
                 </Box>
               </CardContent>
             </Card>
-          </Grid>
-        ))
-        )}
-      </Grid>
+          ))}
+        </Box>
+      )}
 
       {totalPages > 1 && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>

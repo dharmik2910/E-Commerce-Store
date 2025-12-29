@@ -35,6 +35,14 @@ import {
 } from '../store/slices/cartSlice';
 import { addOrder } from '../store/slices/orderSlice';
 import { formatPrice } from '../utils/currency';
+import {
+  createDefaultShippingAddress,
+  validateShippingAddress,
+  isShippingAddressValid,
+  SHIPPING_FIELDS,
+  SHIPPING_FIELD_LABELS,
+  SHIPPING_FIELD_PLACEHOLDERS,
+} from '../utils/shippingConstants';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -43,15 +51,7 @@ const Checkout = () => {
   const savedForLater = useSelector(selectSavedForLater);
   const total = useSelector(selectCartTotal);
   const [tabValue, setTabValue] = useState(0);
-  const [shippingAddress, setShippingAddress] = useState({
-    name: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: '',
-    contact: '',
-  });
+  const [shippingAddress, setShippingAddress] = useState(createDefaultShippingAddress());
   const [errors, setErrors] = useState({});
 
   const handleQuantityChange = (id, newQuantity) => {
@@ -75,18 +75,11 @@ const Checkout = () => {
   };
 
   const handleCheckout = () => {
-    // Validate shipping address
-    const newErrors = {};
-    if (!shippingAddress.name) newErrors.name = 'Name is required';
-    if (!shippingAddress.address) newErrors.address = 'Address is required';
-    if (!shippingAddress.city) newErrors.city = 'City is required';
-    if (!shippingAddress.state) newErrors.state = 'State is required';
-    if (!shippingAddress.zipCode) newErrors.zipCode = 'Zip Code is required';
-    if (!shippingAddress.country) newErrors.country = 'Country is required';
-    if (!shippingAddress.contact) newErrors.contact = 'Contact is required';
+    // Validate shipping address using utility function
+    const validationErrors = validateShippingAddress(shippingAddress);
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
 
@@ -100,6 +93,7 @@ const Checkout = () => {
       subtotal: total,
       shipping: 0,
       shippingAddress: shippingAddress,
+      status: 'confirmed',
     };
 
     dispatch(addOrder(order));
@@ -128,7 +122,18 @@ const Checkout = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography 
+        variant="h4" 
+        component="h1" 
+        gutterBottom
+        sx={{
+          fontWeight: 800,
+          mb: 3,
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+        }}
+      >
         Checkout
       </Typography>
 
@@ -147,20 +152,35 @@ const Checkout = () => {
               Your cart is empty. Check your saved items!
             </Alert>
           ) : (
-            <TableContainer component={Paper} sx={{ mt: 2 }}>
+            <TableContainer 
+              component={Paper} 
+              sx={{ 
+                mt: 2,
+                borderRadius: 1,
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+              }}
+            >
               <Table>
                 <TableHead>
-                  <TableRow>
-                    <TableCell>Product</TableCell>
-                    <TableCell align="center">Quantity</TableCell>
-                    <TableCell align="right">Price</TableCell>
-                    <TableCell align="right">Total</TableCell>
-                    <TableCell align="center">Action</TableCell>
+                  <TableRow sx={{ bgcolor: 'grey.50' }}>
+                    <TableCell sx={{ fontWeight: 700 }}>Product</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700 }}>Quantity</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700 }}>Price</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700 }}>Total</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700 }}>Action</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {cartItems.map((item) => (
-                    <TableRow key={item.id}>
+                    <TableRow 
+                      key={item.id}
+                      sx={{
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          bgcolor: 'grey.50',
+                        },
+                      }}
+                    >
                       <TableCell>
                         <Box 
                           sx={{ 
@@ -168,18 +188,30 @@ const Checkout = () => {
                             alignItems: 'center', 
                             gap: 2,
                             cursor: 'pointer',
+                            transition: 'all 0.2s ease',
                             '&:hover': {
-                              opacity: 0.7
-                            }
+                              transform: 'translateX(4px)',
+                            },
                           }}
                           onClick={() => navigate(`/product/${item.id}`)}
                         >
-                          <img
+                          <Box
+                            component="img"
                             src={item.thumbnail}
                             alt={item.title}
-                            style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }}
+                            sx={{
+                              width: 50,
+                              height: 50,
+                              objectFit: 'contain',
+                              borderRadius: 2,
+                              bgcolor: '#f8fafc',
+                              p: 1,
+                              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                            }}
                           />
-                          <Typography variant="body1">{item.title}</Typography>
+                          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                            {item.title}
+                          </Typography>
                         </Box>
                       </TableCell>
                       <TableCell align="center">
@@ -190,24 +222,57 @@ const Checkout = () => {
                               e.stopPropagation();
                               handleQuantityChange(item.id, item.quantity - 1);
                             }}
+                            sx={{
+                              border: 1,
+                              borderColor: 'divider',
+                              borderRadius: 1,
+                              '&:hover': {
+                                bgcolor: 'primary.50',
+                                borderColor: 'primary.main',
+                              },
+                            }}
                           >
                             <Remove />
                           </IconButton>
-                          <Typography variant="body1">{item.quantity}</Typography>
+                          <Typography 
+                            variant="body1" 
+                            sx={{ 
+                              fontWeight: 600,
+                              minWidth: 30,
+                              textAlign: 'center',
+                            }}
+                          >
+                            {item.quantity}
+                          </Typography>
                           <IconButton
                             size="small"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleQuantityChange(item.id, item.quantity + 1);
                             }}
+                            sx={{
+                              border: 1,
+                              borderColor: 'divider',
+                              borderRadius: 1,
+                              '&:hover': {
+                                bgcolor: 'primary.50',
+                                borderColor: 'primary.main',
+                              },
+                            }}
                           >
                             <Add />
                           </IconButton>
                         </Box>
                       </TableCell>
-                      <TableCell align="right">{formatPrice(item.price)}</TableCell>
                       <TableCell align="right">
-                        {formatPrice(item.price * item.quantity)}
+                        <Typography sx={{ fontWeight: 600, color: '#667EEA' }}>
+                          {formatPrice(item.price)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography sx={{ fontWeight: 700, color: '#667EEA' }}>
+                          {formatPrice(item.price * item.quantity)}
+                        </Typography>
                       </TableCell>
                       <TableCell align="center">
                         <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
@@ -218,6 +283,13 @@ const Checkout = () => {
                               handleSaveForLater(item.id);
                             }}
                             title="Save for later"
+                            sx={{
+                              borderRadius: 1,
+                              '&:hover': {
+                                bgcolor: 'warning.50',
+                                transform: 'scale(1.1)',
+                              },
+                            }}
                           >
                             <Bookmark />
                           </IconButton>
@@ -226,6 +298,13 @@ const Checkout = () => {
                             onClick={(e) => {
                               e.stopPropagation();
                               handleRemove(item.id);
+                            }}
+                            sx={{
+                              borderRadius: 1,
+                              '&:hover': {
+                                bgcolor: 'error.50',
+                                transform: 'scale(1.1)',
+                              },
                             }}
                           >
                             <Delete />
@@ -277,7 +356,7 @@ const Checkout = () => {
                           <img
                             src={item.thumbnail}
                             alt={item.title}
-                            style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }}
+                            style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 2 }}
                           />
                           <Typography variant="body1">{item.title}</Typography>
                         </Box>
@@ -319,136 +398,154 @@ const Checkout = () => {
       {/* Shipping Address Form */}
       {tabValue === 0 && cartItems.length > 0 && (
         <>
-          <Paper sx={{ p: 3, mt: 3 }}>
-            <Typography variant="h6" gutterBottom>
+          <Paper 
+            sx={{ 
+              p: 3, 
+              mt: 3,
+              borderRadius: 1,
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+            }}
+          >
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, mb: 2 }}>
               Shipping Address
             </Typography>
             <Grid container spacing={2} sx={{ mt: 1 }}>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Full Name"
+                  label={SHIPPING_FIELD_LABELS[SHIPPING_FIELDS.NAME]}
                   required
-                  value={shippingAddress.name}
+                  value={shippingAddress[SHIPPING_FIELDS.NAME]}
                   onChange={(e) => {
-                    setShippingAddress({ ...shippingAddress, name: e.target.value });
-                    if (errors.name) setErrors({ ...errors, name: '' });
+                    setShippingAddress({ ...shippingAddress, [SHIPPING_FIELDS.NAME]: e.target.value });
+                    if (errors[SHIPPING_FIELDS.NAME]) setErrors({ ...errors, [SHIPPING_FIELDS.NAME]: '' });
                   }}
-                  error={!!errors.name}
+                  error={!!errors[SHIPPING_FIELDS.NAME]}
+                  placeholder={SHIPPING_FIELD_PLACEHOLDERS[SHIPPING_FIELDS.NAME]}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                    },
+                  }}
                 />
-                {errors.name && (
+                {errors[SHIPPING_FIELDS.NAME] && (
                   <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                    {errors.name}
+                    {errors[SHIPPING_FIELDS.NAME]}
                   </Typography>
                 )}
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Address"
+                  label={SHIPPING_FIELD_LABELS[SHIPPING_FIELDS.ADDRESS]}
                   required
-                  value={shippingAddress.address}
+                  value={shippingAddress[SHIPPING_FIELDS.ADDRESS]}
                   onChange={(e) => {
-                    setShippingAddress({ ...shippingAddress, address: e.target.value });
-                    if (errors.address) setErrors({ ...errors, address: '' });
+                    setShippingAddress({ ...shippingAddress, [SHIPPING_FIELDS.ADDRESS]: e.target.value });
+                    if (errors[SHIPPING_FIELDS.ADDRESS]) setErrors({ ...errors, [SHIPPING_FIELDS.ADDRESS]: '' });
                   }}
-                  error={!!errors.address}
+                  error={!!errors[SHIPPING_FIELDS.ADDRESS]}
+                  placeholder={SHIPPING_FIELD_PLACEHOLDERS[SHIPPING_FIELDS.ADDRESS]}
                 />
-                {errors.address && (
+                {errors[SHIPPING_FIELDS.ADDRESS] && (
                   <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                    {errors.address}
+                    {errors[SHIPPING_FIELDS.ADDRESS]}
                   </Typography>
                 )}
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="City"
+                  label={SHIPPING_FIELD_LABELS[SHIPPING_FIELDS.CITY]}
                   required
-                  value={shippingAddress.city}
+                  value={shippingAddress[SHIPPING_FIELDS.CITY]}
                   onChange={(e) => {
-                    setShippingAddress({ ...shippingAddress, city: e.target.value });
-                    if (errors.city) setErrors({ ...errors, city: '' });
+                    setShippingAddress({ ...shippingAddress, [SHIPPING_FIELDS.CITY]: e.target.value });
+                    if (errors[SHIPPING_FIELDS.CITY]) setErrors({ ...errors, [SHIPPING_FIELDS.CITY]: '' });
                   }}
-                  error={!!errors.city}
+                  error={!!errors[SHIPPING_FIELDS.CITY]}
+                  placeholder={SHIPPING_FIELD_PLACEHOLDERS[SHIPPING_FIELDS.CITY]}
                 />
-                {errors.city && (
+                {errors[SHIPPING_FIELDS.CITY] && (
                   <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                    {errors.city}
+                    {errors[SHIPPING_FIELDS.CITY]}
                   </Typography>
                 )}
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="State"
+                  label={SHIPPING_FIELD_LABELS[SHIPPING_FIELDS.STATE]}
                   required
-                  value={shippingAddress.state}
+                  value={shippingAddress[SHIPPING_FIELDS.STATE]}
                   onChange={(e) => {
-                    setShippingAddress({ ...shippingAddress, state: e.target.value });
-                    if (errors.state) setErrors({ ...errors, state: '' });
+                    setShippingAddress({ ...shippingAddress, [SHIPPING_FIELDS.STATE]: e.target.value });
+                    if (errors[SHIPPING_FIELDS.STATE]) setErrors({ ...errors, [SHIPPING_FIELDS.STATE]: '' });
                   }}
-                  error={!!errors.state}
+                  error={!!errors[SHIPPING_FIELDS.STATE]}
+                  placeholder={SHIPPING_FIELD_PLACEHOLDERS[SHIPPING_FIELDS.STATE]}
                 />
-                {errors.state && (
+                {errors[SHIPPING_FIELDS.STATE] && (
                   <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                    {errors.state}
+                    {errors[SHIPPING_FIELDS.STATE]}
                   </Typography>
                 )}
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Zip Code"
+                  label={SHIPPING_FIELD_LABELS[SHIPPING_FIELDS.ZIP_CODE]}
                   required
-                  value={shippingAddress.zipCode}
+                  value={shippingAddress[SHIPPING_FIELDS.ZIP_CODE]}
                   onChange={(e) => {
-                    setShippingAddress({ ...shippingAddress, zipCode: e.target.value });
-                    if (errors.zipCode) setErrors({ ...errors, zipCode: '' });
+                    setShippingAddress({ ...shippingAddress, [SHIPPING_FIELDS.ZIP_CODE]: e.target.value });
+                    if (errors[SHIPPING_FIELDS.ZIP_CODE]) setErrors({ ...errors, [SHIPPING_FIELDS.ZIP_CODE]: '' });
                   }}
-                  error={!!errors.zipCode}
+                  error={!!errors[SHIPPING_FIELDS.ZIP_CODE]}
+                  placeholder={SHIPPING_FIELD_PLACEHOLDERS[SHIPPING_FIELDS.ZIP_CODE]}
                 />
-                {errors.zipCode && (
+                {errors[SHIPPING_FIELDS.ZIP_CODE] && (
                   <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                    {errors.zipCode}
+                    {errors[SHIPPING_FIELDS.ZIP_CODE]}
                   </Typography>
                 )}
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Country"
+                  label={SHIPPING_FIELD_LABELS[SHIPPING_FIELDS.COUNTRY]}
                   required
-                  value={shippingAddress.country}
+                  value={shippingAddress[SHIPPING_FIELDS.COUNTRY]}
                   onChange={(e) => {
-                    setShippingAddress({ ...shippingAddress, country: e.target.value });
-                    if (errors.country) setErrors({ ...errors, country: '' });
+                    setShippingAddress({ ...shippingAddress, [SHIPPING_FIELDS.COUNTRY]: e.target.value });
+                    if (errors[SHIPPING_FIELDS.COUNTRY]) setErrors({ ...errors, [SHIPPING_FIELDS.COUNTRY]: '' });
                   }}
-                  error={!!errors.country}
+                  error={!!errors[SHIPPING_FIELDS.COUNTRY]}
+                  placeholder={SHIPPING_FIELD_PLACEHOLDERS[SHIPPING_FIELDS.COUNTRY]}
                 />
-                {errors.country && (
+                {errors[SHIPPING_FIELDS.COUNTRY] && (
                   <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                    {errors.country}
+                    {errors[SHIPPING_FIELDS.COUNTRY]}
                   </Typography>
                 )}
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Contact Number"
+                  label={SHIPPING_FIELD_LABELS[SHIPPING_FIELDS.CONTACT]}
                   required
                   type="tel"
-                  value={shippingAddress.contact}
+                  value={shippingAddress[SHIPPING_FIELDS.CONTACT]}
                   onChange={(e) => {
-                    setShippingAddress({ ...shippingAddress, contact: e.target.value });
-                    if (errors.contact) setErrors({ ...errors, contact: '' });
+                    setShippingAddress({ ...shippingAddress, [SHIPPING_FIELDS.CONTACT]: e.target.value });
+                    if (errors[SHIPPING_FIELDS.CONTACT]) setErrors({ ...errors, [SHIPPING_FIELDS.CONTACT]: '' });
                   }}
-                  error={!!errors.contact}
-                  placeholder="e.g., +1 234 567 8900"
+                  error={!!errors[SHIPPING_FIELDS.CONTACT]}
+                  placeholder={SHIPPING_FIELD_PLACEHOLDERS[SHIPPING_FIELDS.CONTACT]}
                 />
-                {errors.contact && (
+                {errors[SHIPPING_FIELDS.CONTACT] && (
                   <Typography variant="caption" color="error" sx={{ mt: 0.5, display: 'block' }}>
-                    {errors.contact}
+                    {errors[SHIPPING_FIELDS.CONTACT]}
                   </Typography>
                 )}
               </Grid>
@@ -458,10 +555,18 @@ const Checkout = () => {
       )}
 
       {tabValue === 0 && cartItems.length > 0 && (
-        <Paper sx={{ p: 3, mt: 3 }}>
+        <Paper 
+          sx={{ 
+            p: 3, 
+            mt: 3,
+            borderRadius: 3,
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+            bgcolor: 'grey.50',
+          }}
+        >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-            <Typography variant="h6">Subtotal:</Typography>
-            <Typography variant="h6">{formatPrice(total)}</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>Subtotal:</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: '#667EEA' }}>{formatPrice(total)}</Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
             <Typography variant="body2" color="text.secondary">
@@ -473,8 +578,16 @@ const Checkout = () => {
           </Box>
           <Divider sx={{ my: 2 }} />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-            <Typography variant="h5">Total:</Typography>
-            <Typography variant="h5" color="primary">
+            <Typography variant="h5" sx={{ fontWeight: 800 }}>Total:</Typography>
+            <Typography 
+              variant="h5" 
+              sx={{
+                fontWeight: 800,
+                background: 'linear-gradient(135deg, #667EEA 0%, #667EEA 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}
+            >
               {formatPrice(total)}
             </Typography>
           </Box>
@@ -483,6 +596,18 @@ const Checkout = () => {
             fullWidth
             size="large"
             onClick={handleCheckout}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+              py: 1.5,
+              boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+              '&:hover': {
+                boxShadow: '0 6px 16px rgba(102, 126, 234, 0.4)',
+                transform: 'translateY(-2px)',
+              },
+              transition: 'all 0.3s ease',
+            }}
           >
             Place Order
           </Button>

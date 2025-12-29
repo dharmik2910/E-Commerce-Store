@@ -18,19 +18,19 @@ A modern, full-featured **E-Commerce Web Application** built using **React, Redu
 ---
 
 ### 🛍️ Product Browsing
-- Product catalog with modern card-based UI
-- Real-time product search
-- Category-based filtering (dynamic categories)
-- Sorting by:
-  - Price (Low → High, High → Low)
-  - Name (A → Z, Z → A)
-- Pagination for easy navigation
-- **Product Detail Page** includes:
-  - Detailed product description & specifications
-  - Price and rating
-  - Product reviews & ratings
-  - Add product reviews
+- **Product Catalog**: Browse all available products with beautiful card-based layout
+- **Product Search**: Real-time product search functionality
+- **Category Filtering**: Filter products by category with dynamic category loading
+- **Product Sorting**: Sort products by price (low to high, high to low) and name (A-Z, Z-A)
+- **Pagination**: Navigate through products with pagination controls
+- **Product Detail Page**: Detailed product view with:
+  - Product description and organized specifications
+  - Structured product details (physical, technical, features)
+  - Price and rating display
+  - Product reviews and ratings
+  - Add product reviews functionality
   - Similar product recommendations
+  - Shipping, warranty, and return policy information
 
 ---
 
@@ -46,20 +46,27 @@ A modern, full-featured **E-Commerce Web Application** built using **React, Redu
 ---
 
 ### 🚚 Checkout & Orders
-- Checkout page with:
-  - Cart items with images & details
-  - Quantity update and item removal
-  - Shipping address form with validation
+- **Checkout Page**: Complete checkout process with:
+  - Cart items display with images and details
+  - Quantity adjustment and item removal
+  - Shipping address form with comprehensive validation
   - Order summary with total price
-- Place and save orders
-- Order history with:
+  - Save for later functionality
+- **Order Placement**: Create and save orders with structured order details
+- **Order History**: View all past orders with:
   - Order status (pending, completed, shipped, cancelled)
+  - Order status indicators with color coding
   - Order date & time
   - Total amount
-- Detailed order view with:
-  - Ordered items
-  - Shipping address
-  - Order status & tracking
+- **Order Details**: Detailed view of individual orders with:
+  - Complete order information
+  - All ordered items
+  - Formatted shipping address
+  - Order status and tracking information
+- **Shipping Management**: 
+  - Structured shipping address validation
+  - Shipping method selection support
+  - Shipping cost calculation utilities
 
 ---
 
@@ -103,13 +110,6 @@ This project uses the **DummyJSON API**:
 
 ## ⚙️ Installation & Setup
 
-### Clone the repository
-```bash
-git clone <repository-url>
-cd ecommerce
-
-## Installation
-
 1. Clone the repository:
 ```bash
 git clone <repository-url>
@@ -148,11 +148,16 @@ src/
 │       ├── authSlice.js    # Authentication state
 │       ├── cartSlice.js    # Shopping cart state
 │       ├── orderSlice.js   # Order management state
+│       ├── productSlice.js # Product state management
+│       ├── productSelectors.js # Product state selectors
 │       └── wishlistSlice.js # Wishlist state
 ├── services/               # API services
 │   └── api.js              # API client and functions
 ├── utils/                  # Utility functions
-│   └── currency.js         # Currency formatting utilities
+│   ├── currency.js         # Currency formatting utilities
+│   ├── productConstants.js # Product-related constants and helpers
+│   ├── productDetails.js   # Product details structure and utilities
+│   └── shippingConstants.js # Shipping-related constants and utilities
 ├── App.jsx                 # Main app component with routing
 └── main.jsx                # Application entry point
 ```
@@ -226,4 +231,3 @@ src/
 - ✅ SPA routing configuration  
 - ✅ State persistence via `localStorage`  
 - ✅ Fully responsive across all devices  
-

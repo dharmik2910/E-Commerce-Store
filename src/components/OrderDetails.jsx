@@ -20,6 +20,7 @@ import { ArrowBack } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import { selectOrderById } from '../store/slices/orderSlice';
 import { formatPrice } from '../utils/currency';
+import { formatShippingAddress, SHIPPING_FIELDS } from '../utils/shippingConstants';
 
 const OrderDetails = () => {
   const { id } = useParams();
@@ -29,6 +30,8 @@ const OrderDetails = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'completed':
+        return 'success';
+      case 'confirmed':
         return 'success';
       case 'pending':
         return 'warning';
@@ -99,17 +102,17 @@ const OrderDetails = () => {
               Shipping Address
             </Typography>
             <Typography variant="body2">
-              {order.shippingAddress.name}
+              {order.shippingAddress[SHIPPING_FIELDS.NAME] || order.shippingAddress.name}
               <br />
-              {order.shippingAddress.address}
+              {order.shippingAddress[SHIPPING_FIELDS.ADDRESS] || order.shippingAddress.address}
               <br />
-              {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zipCode}
+              {order.shippingAddress[SHIPPING_FIELDS.CITY] || order.shippingAddress.city}, {order.shippingAddress[SHIPPING_FIELDS.STATE] || order.shippingAddress.state} {order.shippingAddress[SHIPPING_FIELDS.ZIP_CODE] || order.shippingAddress.zipCode}
               <br />
-              {order.shippingAddress.country}
-              {order.shippingAddress.contact && (
+              {order.shippingAddress[SHIPPING_FIELDS.COUNTRY] || order.shippingAddress.country}
+              {(order.shippingAddress[SHIPPING_FIELDS.CONTACT] || order.shippingAddress.contact) && (
                 <>
                   <br />
-                  Contact: {order.shippingAddress.contact}
+                  Contact: {order.shippingAddress[SHIPPING_FIELDS.CONTACT] || order.shippingAddress.contact}
                 </>
               )}
             </Typography>
@@ -135,15 +138,21 @@ const OrderDetails = () => {
                     <img
                       src={item.thumbnail}
                       alt={item.title}
-                      style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }}
+                      style={{ width: 45, height: 45, objectFit: 'cover', borderRadius: 2 }}
                     />
                     <Typography variant="body1">{item.title}</Typography>
                   </Box>
                 </TableCell>
                 <TableCell align="center">{item.quantity}</TableCell>
-                <TableCell align="right">{formatPrice(item.price)}</TableCell>
                 <TableCell align="right">
-                  {formatPrice(item.price * item.quantity)}
+                  <Typography sx={{ color: '#667EEA', fontWeight: 600 }}>
+                    {formatPrice(item.price)}
+                  </Typography>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography sx={{ color: '#667EEA', fontWeight: 700 }}>
+                    {formatPrice(item.price * item.quantity)}
+                  </Typography>
                 </TableCell>
               </TableRow>
             ))}
@@ -156,7 +165,9 @@ const OrderDetails = () => {
           <Grid item xs={12} sm={6}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
               <Typography variant="body1">Subtotal:</Typography>
-              <Typography variant="body1">{formatPrice(order.subtotal || order.total)}</Typography>
+              <Typography variant="body1" sx={{ color: '#667EEA', fontWeight: 600 }}>
+                {formatPrice(order.subtotal || order.total)}
+              </Typography>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
               <Typography variant="body2" color="text.secondary">
@@ -179,7 +190,15 @@ const OrderDetails = () => {
             <Divider sx={{ my: 2 }} />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <Typography variant="h6">Total:</Typography>
-              <Typography variant="h6" color="primary">
+              <Typography 
+                variant="h6" 
+                sx={{
+                  background: 'linear-gradient(135deg, #667EEA 0%, #764ba2 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  fontWeight: 700,
+                }}
+              >
                 {formatPrice(order.total)}
               </Typography>
             </Box>

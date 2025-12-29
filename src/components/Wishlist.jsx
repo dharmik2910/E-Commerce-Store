@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Container,
-  Grid,
   Card,
   CardContent,
   CardMedia,
@@ -54,6 +53,7 @@ const Wishlist = () => {
 
   const handleAddToCart = (product) => {
     dispatch(addToCart(product));
+    dispatch(removeFromWishlist(product.id));
   };
 
   const handleRemoveFromWishlist = (productId) => {
@@ -67,7 +67,16 @@ const Wishlist = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-        <Typography variant="h4" component="h1">
+        <Typography 
+          variant="h4" 
+          component="h1"
+          sx={{
+            fontWeight: 800,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
           My Wishlist ({wishlistItems.length})
         </Typography>
         
@@ -107,24 +116,40 @@ const Wishlist = () => {
           </Button>
         </Box>
       ) : (
-        <Grid container spacing={3} justifyContent="center">
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: 'repeat(2, 1fr)',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(3, 1fr)',
+              lg: 'repeat(4, 1fr)',
+            },
+            gap: 2,
+          }}
+        >
           {sortedItems.map((product) => (
-            <Grid item xs={10} sm={5} md={4} lg={3} key={product.id}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  maxWidth: 280,
-                  width: '100%',
-                  margin: '0 auto',
-                  transition: 'transform 0.2s',
-                  cursor: 'pointer',
-                  position: 'relative',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
+            <Card
+              key={product.id}
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                cursor: 'pointer',
+                position: 'relative',
+                borderRadius: 1,
+                overflow: 'hidden',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                '&:hover': {
+                  transform: 'translateY(-8px)',
+                  boxShadow: '0 12px 24px rgba(0, 0, 0, 0.15)',
+                  '& .product-image': {
+                    transform: 'scale(1.05)',
                   },
-                }}
+                },
+              }}
                 onClick={() => navigate(`/product/${product.id}`)}
               >
                 <IconButton
@@ -133,9 +158,13 @@ const Wishlist = () => {
                     top: 8,
                     right: 8,
                     zIndex: 1,
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+                    transition: 'all 0.3s ease',
                     '&:hover': {
-                      backgroundColor: 'rgba(255, 255, 255, 1)',
+                      backgroundColor: 'error.main',
+                      color: 'white',
+                      transform: 'scale(1.1) rotate(90deg)',
                     },
                   }}
                   onClick={(e) => {
@@ -146,27 +175,46 @@ const Wishlist = () => {
                 >
                   <Delete />
                 </IconButton>
-                <CardMedia
-                  component="img"
-                  image={product.thumbnail}
-                  alt={product.title}
-                  sx={{
-                    width: '100%',
-                    height: 250,
-                    objectFit: 'contain',
-                    backgroundColor: '#f5f5f5',
-                    padding: 1,
-                  }}
-                />
-                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Typography gutterBottom variant="h6" component="h2" noWrap>
+                <Box sx={{ position: 'relative', overflow: 'hidden', bgcolor: '#f8fafc' }}>
+                  <CardMedia
+                    component="img"
+                    image={product.thumbnail}
+                    alt={product.title}
+                    className="product-image"
+                    sx={{
+                      width: '100%',
+                      height: 180,
+                      objectFit: 'contain',
+                      padding: 2,
+                      transition: 'transform 0.5s ease',
+                    }}
+                  />
+                </Box>
+                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
+                  <Typography 
+                    gutterBottom 
+                    variant="h6" 
+                    component="h2" 
+                    sx={{ 
+                      fontWeight: 600,
+                      mb: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                    }}
+                  >
                     {product.title}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1, flexGrow: 1 }}>
-                    {product.description?.substring(0, 100)}...
-                  </Typography>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
-                    <Typography variant="h6" color="primary">
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto', gap: 1 }}>
+                    <Typography 
+                      variant="h6" 
+                      sx={{
+                        fontWeight: 700,
+                        color: '#667EEA',
+                      }}
+                    >
                       {formatPrice(product.price)}
                     </Typography>
                     <Button
@@ -177,20 +225,32 @@ const Wishlist = () => {
                         e.stopPropagation();
                         handleAddToCart(product);
                       }}
+                      sx={{
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        backgroundColor: 'rgb(65, 131, 245)',
+                        boxShadow: '0 2px 8px rgba(65, 131, 245, 0.3)',
+                        '&:hover': {
+                          backgroundColor: 'rgb(45, 111, 225)',
+                          boxShadow: '0 4px 12px rgba(65, 131, 245, 0.4)',
+                          transform: 'translateY(-2px)',
+                        },
+                      }}
                     >
-                      Add to Cart
+                      Add
                     </Button>
                   </Box>
                 </CardContent>
               </Card>
-            </Grid>
           ))}
-        </Grid>
+        </Box>
       )}
     </Container>
   );
 };
 
 export default Wishlist;
+
 
 

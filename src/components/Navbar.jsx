@@ -1,18 +1,35 @@
 import { AppBar, Toolbar, Typography, Button, Badge, IconButton, Box } from '@mui/material';
 import { ShoppingCart, Logout, History, Favorite } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../store/slices/authSlice';
 import { selectCartCount } from '../store/slices/cartSlice';
 import { selectWishlistItems } from '../store/slices/wishlistSlice';
+import { setCurrentPage, setSearchQuery, setSelectedCategory } from '../store/slices/productSlice';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const cartCount = useSelector(selectCartCount);
   const wishlistItems = useSelector(selectWishlistItems);
   const wishlistCount = wishlistItems.length;
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+
+  const handleHomeClick = () => {
+    // Reset filters and page
+    dispatch(setCurrentPage(1));
+    dispatch(setSearchQuery(''));
+    dispatch(setSelectedCategory(''));
+    
+    // Navigate to home if not already there
+    if (location.pathname !== '/') {
+      navigate('/');
+    }
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -24,14 +41,15 @@ const Navbar = () => {
       position="fixed" 
       elevation={0}
       sx={{ 
-        background: 'linear-gradient(135deg,rgb(154, 155, 195) 0%,rgb(157, 171, 214) 100%)',
-        borderBottom: '1px solid rgba(195, 231, 35, 0.08)',
-        boxShadow: '0 4px 20px rgba(5, 3, 19, 0.15)',
+        background: 'linear-gradient(135deg,rgb(65, 131, 245) 0%,rgb(65, 131, 245) 100%)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+        backdropFilter: 'blur(10px)',
         zIndex: (theme) => theme.zIndex.drawer + 1,
         borderRadius: 0,
       }}
     >
-      <Toolbar sx={{ py: 1.5, px: { xs: 2, sm: 3 } }}>
+      <Toolbar sx={{ py: { xs: 1, sm: 1.5 }, px: { xs: 1, sm: 3 }, minHeight: { xs: 48, sm: 64 } }}>
         <Typography
           variant="h5"
           component="div"
@@ -40,48 +58,56 @@ const Navbar = () => {
             cursor: 'pointer',
             fontWeight: 800,
             letterSpacing: '-0.5px',
-            fontSize: { xs: '1.25rem', sm: '1.5rem' },
-            transition: 'opacity 0.2s',
-            '&:hover': {
-              opacity: 0.9,
-            },
+            fontSize: { xs: '1rem', sm: '1.5rem' },
+            color: 'white',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
           }}
-          onClick={() => navigate('/')}
+          onClick={handleHomeClick}
         >
-          🛍️ E-Commerce Store
+          <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+            🛒 E-Commerce Store
+          </Box>
+          <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>
+            🛒 E-Commerce Store
+          </Box>
         </Typography>
         
         {isAuthenticated && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Button
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 } }}>
+            <IconButton
               color="inherit"
               onClick={() => navigate('/orders')}
-              startIcon={<History />}
               sx={{
-                borderRadius: 0,
-                textTransform: 'none',
-                fontWeight: 600,
-                px: 2,
-                transition: 'all 0.2s',
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
+                color: 'white',
+                p: { xs: 0.75, sm: 1 },
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                  transform: 'translateY(-1px)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                 },
               }}
+              title="Orders"
             >
-              Orders
-            </Button>
+              <History sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />
+            </IconButton>
             <IconButton
               color="inherit"
               onClick={() => navigate('/wishlist')}
               sx={{
-                borderRadius: 0,
-                transition: 'all 0.2s',
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
+                color: 'white',
+                p: { xs: 0.75, sm: 1 },
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                  transform: 'scale(1.05)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  transform: 'scale(1.1) rotate(5deg)',
                 },
               }}
+              title="Wishlist"
             >
               <Badge 
                 badgeContent={wishlistCount} 
@@ -89,26 +115,30 @@ const Navbar = () => {
                 sx={{
                   '& .MuiBadge-badge': {
                     fontWeight: 700,
-                    fontSize: '0.75rem',
-                    minWidth: 20,
-                    height: 20,
+                    fontSize: { xs: '0.65rem', sm: '0.7rem' },
+                    minWidth: { xs: 16, sm: 18 },
+                    height: { xs: 16, sm: 18 },
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
                   },
                 }}
               >
-                <Favorite />
+                <Favorite sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />
               </Badge>
             </IconButton>
             <IconButton
               color="inherit"
               onClick={() => navigate('/checkout')}
               sx={{
-                borderRadius: 0,
-                transition: 'all 0.2s',
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
+                color: 'white',
+                p: { xs: 0.75, sm: 1 },
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                  transform: 'scale(1.05)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  transform: 'scale(1.1)',
                 },
               }}
+              title="Cart"
             >
               <Badge 
                 badgeContent={cartCount} 
@@ -116,33 +146,34 @@ const Navbar = () => {
                 sx={{
                   '& .MuiBadge-badge': {
                     fontWeight: 700,
-                    fontSize: '0.75rem',
-                    minWidth: 20,
-                    height: 20,
+                    fontSize: { xs: '0.65rem', sm: '0.7rem' },
+                    minWidth: { xs: 16, sm: 18 },
+                    height: { xs: 16, sm: 18 },
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
                   },
                 }}
               >
-                <ShoppingCart />
+                <ShoppingCart sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />
               </Badge>
             </IconButton>
-            <Button 
-              color="inherit" 
-              onClick={handleLogout} 
-              startIcon={<Logout />}
+            <IconButton
+              color="inherit"
+              onClick={handleLogout}
               sx={{
-                borderRadius: 0,
-                textTransform: 'none',
-                fontWeight: 600,
-                px: 2,
-                transition: 'all 0.2s',
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
+                color: 'white',
+                p: { xs: 0.75, sm: 1 },
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                  transform: 'translateY(-1px)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                 },
               }}
+              title="Logout"
             >
-              Logout
-            </Button>
+              <Logout sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />
+            </IconButton>
           </Box>
         )}
       </Toolbar>

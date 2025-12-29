@@ -38,7 +38,7 @@ const Login = () => {
   };
 
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="xs">
       <Box
         sx={{
           minHeight: 'calc(100vh - 64px)',
@@ -52,9 +52,10 @@ const Login = () => {
         <Paper 
           elevation={0}
           sx={{ 
-            padding: { xs: 3, sm: 5 }, 
+            padding: { xs: 3, sm: 4 }, 
             width: '100%',
-            borderRadius: 3,
+            maxWidth: 400,
+            borderRadius: 1,
             boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
             background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.98) 100%)',
           }}

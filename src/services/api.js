@@ -142,20 +142,59 @@ export const getProductById = async (id) => {
   }
 };
 
-// Get product reviews (DummyJSON doesn't have reviews, so we'll simulate with localStorage)
+// Get product reviews from API and merge with user-added reviews
 export const getProductReviews = async (productId) => {
   try {
-    // Try to get from API if available
+    // Get product from API which includes reviews
     const response = await api.get(`${API_BASE_URL}/products/${productId}`);
-    // DummyJSON doesn't have reviews endpoint, so we'll use localStorage
-    const storedReviews = localStorage.getItem(`reviews_${productId}`);
-    if (storedReviews) {
-      return JSON.parse(storedReviews);
+    const product = response.data;
+    
+    // Extract reviews from API response
+    let apiReviews = [];
+    if (product.reviews && Array.isArray(product.reviews)) {
+      apiReviews = product.reviews.map(review => ({
+        id: review.id || Date.now() + Math.random(),
+        productId: parseInt(productId),
+        userId: review.reviewerEmail || 'user',
+        username: review.reviewerName || 'Anonymous',
+        rating: review.rating || 0,
+        comment: review.comment || '',
+        date: review.date || new Date().toISOString(),
+      }));
     }
-    // Return empty reviews array
-    return { reviews: [], total: 0, rating: 0 };
+    
+    // Get user-added reviews from localStorage
+    const storedReviews = localStorage.getItem(`reviews_${productId}`);
+    let userReviews = [];
+    if (storedReviews) {
+      const parsed = JSON.parse(storedReviews);
+      if (parsed.reviews && Array.isArray(parsed.reviews)) {
+        userReviews = parsed.reviews;
+      }
+    }
+    
+    // Merge API reviews with user reviews (user reviews take precedence if same ID)
+    const allReviews = [...apiReviews];
+    userReviews.forEach(userReview => {
+      // Only add if not already in API reviews
+      if (!apiReviews.some(apiReview => apiReview.id === userReview.id)) {
+        allReviews.push(userReview);
+      }
+    });
+    
+    // Calculate total and average rating
+    const total = allReviews.length;
+    const rating = total > 0 
+      ? allReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / total 
+      : (product.rating || 0);
+    
+    return {
+      reviews: allReviews,
+      total: total,
+      rating: rating
+    };
   } catch (error) {
-    // Fallback to localStorage
+    // Fallback to localStorage if API fails
     const storedReviews = localStorage.getItem(`reviews_${productId}`);
     if (storedReviews) {
       return JSON.parse(storedReviews);
@@ -164,28 +203,42 @@ export const getProductReviews = async (productId) => {
   }
 };
 
-// Add product review
+// Add product review (stores in localStorage and merges with API reviews)
 export const addProductReview = async (productId, review) => {
   try {
-    // Since DummyJSON doesn't have reviews API, we'll store in localStorage
+    // Get existing user reviews from localStorage
     const storedReviews = localStorage.getItem(`reviews_${productId}`);
-    let reviews = storedReviews ? JSON.parse(storedReviews) : { reviews: [], total: 0, rating: 0 };
+    let userReviews = [];
+    if (storedReviews) {
+      const parsed = JSON.parse(storedReviews);
+      if (parsed.reviews && Array.isArray(parsed.reviews)) {
+        userReviews = parsed.reviews;
+      }
+    }
     
     const newReview = {
       id: Date.now(),
-      productId,
+      productId: parseInt(productId),
       userId: review.userId || 'user',
       username: review.username || 'Anonymous',
       rating: review.rating,
       comment: review.comment,
       date: new Date().toISOString(),
+      isUserReview: true, // Flag to identify user-added reviews
     };
     
-    reviews.reviews.push(newReview);
-    reviews.total = reviews.reviews.length;
-    reviews.rating = reviews.reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.total;
+    // Add new review to user reviews
+    userReviews.push(newReview);
     
-    localStorage.setItem(`reviews_${productId}`, JSON.stringify(reviews));
+    // Store user reviews in localStorage
+    localStorage.setItem(`reviews_${productId}`, JSON.stringify({
+      reviews: userReviews,
+      total: userReviews.length,
+      rating: userReviews.length > 0 
+        ? userReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / userReviews.length 
+        : 0
+    }));
+    
     return newReview;
   } catch (error) {
     throw error;

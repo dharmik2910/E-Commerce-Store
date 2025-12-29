@@ -28,6 +28,8 @@ const OrderHistory = () => {
     switch (status) {
       case 'completed':
         return 'success';
+      case 'confirmed':
+        return 'success';
       case 'pending':
         return 'warning';
       case 'cancelled':
@@ -68,7 +70,17 @@ const OrderHistory = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography 
+        variant="h4" 
+        component="h1" 
+        gutterBottom
+        sx={{
+          fontWeight: 800,
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+        }}
+      >
         Order History
       </Typography>
 
@@ -103,7 +115,7 @@ const OrderHistory = () => {
                   </Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="body1" fontWeight="bold">
+                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#667EEA' }}>
                     {formatPrice(order.total)}
                   </Typography>
                 </TableCell>
