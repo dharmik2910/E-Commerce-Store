@@ -58,20 +58,16 @@ const Navbar = () => {
             cursor: 'pointer',
             fontWeight: 800,
             letterSpacing: '-0.5px',
-            fontSize: { xs: '1rem', sm: '1.5rem' },
+            fontSize: { xs: '0.875rem', sm: '1.25rem', md: '1.5rem' },
             color: 'white',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
+            maxWidth: { xs: 'calc(100vw - 200px)', sm: 'none' },
           }}
           onClick={handleHomeClick}
         >
-          <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
-            🛒 E-Commerce Store
-          </Box>
-          <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>
-            🛒 E-Commerce Store
-          </Box>
+          🛒 E-Commerce Store
         </Typography>
         
         {isAuthenticated && (

@@ -156,7 +156,7 @@ const Home = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: { xs: 2, sm: 4 }, mb: 4, px: { xs: 1, sm: 3 } }}>
       <Box sx={{ mb: 4 }}>
         <Typography 
           variant="h4" 
@@ -168,6 +168,7 @@ const Home = () => {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             mb: 3,
+            fontSize: { xs: '1.5rem', sm: '2.125rem' },
           }}
         >
           Discover Products
@@ -176,7 +177,7 @@ const Home = () => {
         <Box sx={{ 
           display: 'flex', 
           gap: { xs: 1, sm: 2 }, 
-          flexWrap: { xs: 'nowrap', sm: 'wrap' }, 
+          flexWrap: 'wrap', 
           mt: 2, 
           alignItems: 'center',
           p: { xs: 1, sm: 2 },
@@ -191,9 +192,9 @@ const Home = () => {
             variant="outlined"
             size="small"
             sx={{ 
-              minWidth: { xs: 120, sm: 300 }, 
-              flexGrow: 1, 
-              maxWidth: { xs: 'none', sm: 500 },
+              minWidth: { xs: '100%', sm: 300 }, 
+              flexGrow: { xs: 0, sm: 1 }, 
+              maxWidth: { xs: '100%', sm: 500 },
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
                 fontSize: { xs: '0.875rem', sm: '1rem' },
@@ -225,7 +226,8 @@ const Home = () => {
           <FormControl 
             size="small"
             sx={{ 
-              minWidth: { xs: 100, sm: 200 },
+              minWidth: { xs: 'calc(50% - 8px)', sm: 200 },
+              flexGrow: { xs: 1, sm: 0 },
               '& .MuiInputLabel-root': {
                 fontSize: { xs: '0.875rem', sm: '1rem' },
               },
@@ -257,7 +259,8 @@ const Home = () => {
           <FormControl 
             size="small"
             sx={{ 
-              minWidth: { xs: 100, sm: 200 },
+              minWidth: { xs: 'calc(50% - 8px)', sm: 200 },
+              flexGrow: { xs: 1, sm: 0 },
               '& .MuiInputLabel-root': {
                 fontSize: { xs: '0.875rem', sm: '1rem' },
               },
@@ -327,7 +330,7 @@ const Home = () => {
               md: 'repeat(5, 1fr)',
               lg: 'repeat(5, 1fr)',
             },
-            gap: 3,
+            gap: { xs: 1.5, sm: 2, md: 3 },
           }}
         >
           {products.map((product) => (
@@ -361,20 +364,24 @@ const Home = () => {
                   className="product-image"
                   sx={{
                     width: '100%',
-                    height: 180,
+                    height: { xs: 140, sm: 160, md: 180 },
                     objectFit: 'contain',
-                    padding: 2,
+                    padding: { xs: 1, sm: 1.5, md: 2 },
                     transition: 'transform 0.5s ease',
                   }}
                 />
                 <IconButton
                   sx={{
                     position: 'absolute',
-                    top: 8,
-                    left: 8,
+                    top: { xs: 4, sm: 8 },
+                    left: { xs: 4, sm: 8 },
                     zIndex: 1,
                     backgroundColor: 'transparent',
                     transition: 'all 0.3s ease',
+                    p: { xs: 0.5, sm: 1 },
+                    '& .MuiSvgIcon-root': {
+                      fontSize: { xs: '1rem', sm: '1.25rem' },
+                    },
                     '&:hover': {
                       backgroundColor: 'transparent',
                       transform: 'scale(1.1)',
@@ -396,15 +403,17 @@ const Home = () => {
                     size="small"
                     sx={{
                       position: 'absolute',
-                      top: 8,
-                      right: 8,
+                      top: { xs: 4, sm: 8 },
+                      right: { xs: 4, sm: 8 },
                       fontWeight: 700,
+                      fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                      height: { xs: 20, sm: 24 },
                       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
                     }}
                   />
                 )}
               </Box>
-              <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
+              <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: { xs: 1, sm: 1.5, md: 2 } }}>
                 <Typography 
                   gutterBottom 
                   variant="h6" 
@@ -417,17 +426,19 @@ const Home = () => {
                     display: '-webkit-box',
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical',
+                    fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' },
                   }}
                 >
                   {product.title}
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, mb: { xs: 1, sm: 2 }, flexWrap: 'wrap' }}>
                   <Rating 
                     value={product.rating || 0} 
                     precision={0.1} 
                     readOnly 
                     size="small"
                     sx={{
+                      fontSize: { xs: '1rem', sm: '1.25rem' },
                       '& .MuiRating-iconFilled': {
                         color: '#fbbf24',
                       },
@@ -436,7 +447,7 @@ const Home = () => {
                   <Typography 
                     variant="body2" 
                     color="text.secondary"
-                    sx={{ fontWeight: 500 }}
+                    sx={{ fontWeight: 500, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
                   >
                     {product.rating ? product.rating.toFixed(1) : '0.0'}
                   </Typography>
@@ -444,19 +455,20 @@ const Home = () => {
                     <Typography 
                       variant="body2" 
                       color="text.secondary"
-                      sx={{ ml: 0.5 }}
+                      sx={{ ml: 0.5, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
                     >
                       ({product.reviews.length})
                     </Typography>
                   )}
                 </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto', gap: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, mt: 'auto', gap: { xs: 0.5, sm: 1 }, flexDirection: { xs: 'column', sm: 'row' } }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, sm: 1 }, flexWrap: 'wrap' }}>
                     <Typography 
                       variant="h6" 
                       sx={{
                         fontWeight: 700,
                         color: '#667EEA',
+                        fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' },
                       }}
                     >
                       {formatPrice(product.price)}
@@ -470,6 +482,7 @@ const Home = () => {
                           sx={{ 
                             textDecoration: 'line-through',
                             fontWeight: 500,
+                            fontSize: { xs: '0.75rem', sm: '0.875rem' },
                           }}
                         >
                           {formatPrice(originalPrice)}
@@ -491,6 +504,10 @@ const Home = () => {
                       fontWeight: 600,
                       backgroundColor: 'rgb(65, 131, 245)',
                       boxShadow: '0 2px 8px rgba(65, 131, 245, 0.3)',
+                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                      px: { xs: 1, sm: 2 },
+                      py: { xs: 0.5, sm: 0.75 },
+                      width: { xs: '100%', sm: 'auto' },
                       '&:hover': {
                         backgroundColor: 'rgb(45, 111, 225)',
                         boxShadow: '0 4px 12px rgba(65, 131, 245, 0.4)',
